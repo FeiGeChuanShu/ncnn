@@ -21,13 +21,8 @@
 #include <stdio.h>
 #include <vector>
 
-struct KeyPoint
-{
-    cv::Point2f p;
-    float prob;
-};
 
-static int detect_posenet(const cv::Mat& bgr, std::vector<KeyPoint>& keypoints)
+static int detect(const cv::Mat& bgr, std::vector<cv::Point2f>& keypoints)
 {
     ncnn::Net posenet;
 
@@ -44,7 +39,7 @@ static int detect_posenet(const cv::Mat& bgr, std::vector<KeyPoint>& keypoints)
 
     const float meanVals[3] = { 128.0f, 128.0f,  128.0f };
     const float normVals[3] = { 0.00390625f, 0.00390625f, 0.00390625f };
-    in.substract_mean_normalize(mean_vals, norm_vals);
+    in.substract_mean_normalize(meanVals, normVals);
 
     ncnn::Extractor ex = posenet.create_extractor();
 
@@ -61,8 +56,8 @@ static int detect_posenet(const cv::Mat& bgr, std::vector<KeyPoint>& keypoints)
         const float *ptr = data.row(0);
         for (size_t j = 0; j < 21; j++)
         {
-            float pt_x = scoredata[j * 2] * bgr.cols;
-            float pt_y = scoredata[j * 2 + 1] * bgr.rows;
+            float pt_x = ptr[j * 2] * bgr.cols;
+            float pt_y = ptr[j * 2 + 1] * bgr.rows;
             cv::Point2f keypt;
             keypt = cv::Point2f(pt_x , pt_y);
             keypoints.push_back(keypt);
@@ -116,13 +111,13 @@ static void draw_pose(const cv::Mat& bgr, const std::vector<cv::Point2f>& keypoi
 
 int main(int argc, char** argv)
 {
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: %s [imagepath]\n", argv[0]);
-        return -1;
-    }
+    //if (argc != 2)
+    //{
+    //    fprintf(stderr, "Usage: %s [imagepath]\n", argv[0]);
+    //    return -1;
+    //}
 
-    const char* imagepath = argv[1];
+	const char* imagepath = "122.jpg";//argv[1];
 
     cv::Mat m = cv::imread(imagepath, 1);
     if (m.empty())
@@ -132,7 +127,7 @@ int main(int argc, char** argv)
     }
 
     std::vector<cv::Point2f> keypoints;
-    detect_pose(m, keypoints);
+    detect(m, keypoints);
 
     draw_pose(m, keypoints);
 
