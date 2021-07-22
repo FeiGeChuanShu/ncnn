@@ -803,7 +803,6 @@ PYBIND11_MODULE(ncnn, m)
     .def_readwrite("support_bf16_storage", &Layer::support_bf16_storage)
     .def_readwrite("support_fp16_storage", &Layer::support_fp16_storage)
     .def_readwrite("support_image_storage", &Layer::support_image_storage)
-    .def_readwrite("use_int8_inference", &Layer::use_int8_inference)
     .def_readwrite("support_weight_fp16_storage", &Layer::support_weight_fp16_storage)
     .def("forward", (int (Layer::*)(const std::vector<Mat>&, std::vector<Mat>&, const Option&) const) & Layer::forward,
          py::arg("bottom_blobs"), py::arg("top_blobs"), py::arg("opt"))
@@ -885,6 +884,14 @@ PYBIND11_MODULE(ncnn, m)
 
     .def("clear", &Net::clear)
     .def("create_extractor", &Net::create_extractor, py::keep_alive<0, 1>()) //net should be kept alive until retuned ex is freed by gc
+
+    .def("input_indexes", &Net::input_indexes, py::return_value_policy::reference)
+    .def("input_indexes", &Net::output_indexes, py::return_value_policy::reference)
+#if NCNN_STRING
+    .def("input_names", &Net::input_names, py::return_value_policy::reference)
+    .def("output_names", &Net::output_names, py::return_value_policy::reference)
+#endif // NCNN_STRING
+
     .def("blobs", &Net::blobs, py::return_value_policy::reference_internal)
     .def("layers", &Net::layers, py::return_value_policy::reference_internal);
 
@@ -896,6 +903,7 @@ PYBIND11_MODULE(ncnn, m)
     m.def("cpu_support_arm_vfpv4", &cpu_support_arm_vfpv4);
     m.def("cpu_support_arm_asimdhp", &cpu_support_arm_asimdhp);
     m.def("cpu_support_x86_avx2", &cpu_support_x86_avx2);
+    m.def("cpu_support_x86_avx", &cpu_support_x86_avx);
     m.def("get_cpu_count", &get_cpu_count);
     m.def("get_little_cpu_count", &get_little_cpu_count);
     m.def("get_big_cpu_count", &get_big_cpu_count);
@@ -1077,19 +1085,19 @@ PYBIND11_MODULE(ncnn, m)
     py::arg("src"),
     py::arg("opt") = Option());
 
-    m.def("quantize_float32_to_int8", &quantize_float32_to_int8,
+    m.def("quantize_to_int8", &quantize_to_int8,
           py::arg("src"), py::arg("dst"),
-          py::arg("scale"),
+          py::arg("scale_data"),
           py::arg("opt") = Option());
     m.def(
-        "quantize_float32_to_int8",
-    [](const Mat& src, float scale, const Option& opt) {
+        "quantize_to_int8",
+    [](const Mat& src, const Mat& scale_data, const Option& opt) {
         Mat dst;
-        quantize_float32_to_int8(src, dst, scale, opt);
+        quantize_to_int8(src, dst, scale_data, opt);
         return dst;
     },
     py::arg("src"),
-    py::arg("scale"),
+    py::arg("scale_data"),
     py::arg("opt") = Option());
 
 #if NCNN_STRING

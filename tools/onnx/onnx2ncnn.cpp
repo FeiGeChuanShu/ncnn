@@ -2091,17 +2091,9 @@ static void fuse_lstm_gru_rnn(onnx::GraphProto* mutable_graph, std::map<std::str
             }
 
             blob_names.erase(node->output(0));
-            if (node->output_size() > 1)
-            {
-                for (int j = 1; j < node->output_size(); j++)
-                {
-                    blob_names.erase(node->output(j));
-                }
-            }
             blob_names.erase(node2->output(0));
 
-            node->clear_output();
-            node->add_output(node3->output(0));
+            node->set_output(0, node3->output(0));
 
             reduced_node_count += 2;
             i += 2;
@@ -2182,16 +2174,8 @@ static void fuse_lstm_gru_rnn(onnx::GraphProto* mutable_graph, std::map<std::str
             node_reference[node->output(0)] -= 1;
 
             blob_names.erase(node->output(0));
-            if (node->output_size() > 1)
-            {
-                for (int j = 1; j < node->output_size(); j++)
-                {
-                    blob_names.erase(node->output(j));
-                }
-            }
 
-            node->clear_output();
-            node->add_output(node2->output(0));
+            node->set_output(0, node2->output(0));
 
             reduced_node_count += 1;
             i += 1;
@@ -2846,9 +2830,15 @@ static void fuse_binaryop_with_scalar(onnx::GraphProto* mutable_graph, std::map<
 
 int main(int argc, char** argv)
 {
+    if (!(argc == 2 || argc == 4))
+    {
+        fprintf(stderr, "Usage: %s [onnxpb] [ncnnparam] [ncnnbin]\n", argv[0]);
+        return -1;
+    }
+
     const char* onnxpb = argv[1];
-    const char* ncnn_prototxt = argc >= 4 ? argv[2] : "ncnn.param";
-    const char* ncnn_modelbin = argc >= 4 ? argv[3] : "ncnn.bin";
+    const char* ncnn_prototxt = argc == 4 ? argv[2] : "ncnn.param";
+    const char* ncnn_modelbin = argc == 4 ? argv[3] : "ncnn.bin";
 
     onnx::ModelProto model;
 
@@ -3282,6 +3272,10 @@ int main(int argc, char** argv)
     {
         const std::string& input_name = it->first;
 
+        // there may be some weight nodes in initializer but none of the graph node use them
+        // add them to blob_names so we could get proper blob count later
+        blob_names.insert(input_name);
+
         int refcount = node_reference[input_name];
         if (refcount == 0)
             zero_reference_weight_node_count++;
@@ -3496,7 +3490,15 @@ int main(int argc, char** argv)
         }
         else if (op == "AveragePool" || op == "MaxPool")
         {
-            fprintf(pp, "%-16s", "Pooling");
+            std::vector<int> kernel_shape = get_node_attr_ai(node, "kernel_shape");
+            if (kernel_shape.size() == 1)
+            {
+                fprintf(pp, "%-16s", "Pooling1D");
+            }
+            else
+            {
+                fprintf(pp, "%-16s", "Pooling");
+            }
         }
         else if (op == "BatchNormalization")
         {
@@ -3524,14 +3526,22 @@ int main(int argc, char** argv)
         }
         else if (op == "Conv")
         {
-            int group = get_node_attr_i(node, "group", 1);
-            if (group > 1)
+            std::vector<int> kernel_shape = get_node_attr_ai(node, "kernel_shape");
+            if (kernel_shape.size() == 1)
             {
-                fprintf(pp, "%-16s", "ConvolutionDepthWise");
+                fprintf(pp, "%-16s", "Convolution1D");
             }
             else
             {
-                fprintf(pp, "%-16s", "Convolution");
+                int group = get_node_attr_i(node, "group", 1);
+                if (group > 1)
+                {
+                    fprintf(pp, "%-16s", "ConvolutionDepthWise");
+                }
+                else
+                {
+                    fprintf(pp, "%-16s", "Convolution");
+                }
             }
         }
         else if (op == "ConvTranspose")
@@ -4006,11 +4016,8 @@ int main(int argc, char** argv)
             }
             else
             {
-                const onnx::TensorProto& min_tp = weights[node.input(1)];
-                const onnx::TensorProto& max_tp = weights[node.input(2)];
-
-                min = get_node_attr_from_input_f(min_tp);
-                max = get_node_attr_from_input_f(max_tp);
+                min = weights.find(node.input(1)) != weights.end() ? get_node_attr_from_input_f(weights[node.input(1)]) : -FLT_MAX;
+                max = weights.find(node.input(2)) != weights.end() ? get_node_attr_from_input_f(weights[node.input(2)]) : FLT_MAX;
             }
 
             fprintf(pp, " 0=%e", min);
@@ -5533,6 +5540,7 @@ int main(int argc, char** argv)
         }
         else if (op == "Sigmoid")
         {
+            // no param
         }
         else if (op == "Sin")
         {
@@ -5709,6 +5717,7 @@ int main(int argc, char** argv)
         }
         else if (op == "Swish")
         {
+            // no param
         }
         else if (op == "Tan")
         {
