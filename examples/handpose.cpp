@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <vector>
 
-
 static int detect(const cv::Mat& bgr, std::vector<cv::Point2f>& keypoints)
 {
     ncnn::Net posenet;
@@ -37,8 +36,8 @@ static int detect(const cv::Mat& bgr, std::vector<cv::Point2f>& keypoints)
 
     ncnn::Mat in = ncnn::Mat::from_pixels_resize(bgr.data, ncnn::Mat::PIXEL_BGR2RGB, w, h, 224, 224);
 
-    const float meanVals[3] = { 128.0f, 128.0f,  128.0f };
-    const float normVals[3] = { 0.00390625f, 0.00390625f, 0.00390625f };
+    const float meanVals[3] = {128.0f, 128.0f, 128.0f};
+    const float normVals[3] = {0.00390625f, 0.00390625f, 0.00390625f};
     in.substract_mean_normalize(meanVals, normVals);
 
     ncnn::Extractor ex = posenet.create_extractor();
@@ -53,13 +52,13 @@ static int detect(const cv::Mat& bgr, std::vector<cv::Point2f>& keypoints)
     for (int c = 0; c < out.c; c++)
     {
         ncnn::Mat data = out.channel(c);
-        const float *ptr = data.row(0);
+        const float* ptr = data.row(0);
         for (size_t j = 0; j < 21; j++)
         {
             float pt_x = ptr[j * 2] * bgr.cols;
             float pt_y = ptr[j * 2 + 1] * bgr.rows;
             cv::Point2f keypt;
-            keypt = cv::Point2f(pt_x , pt_y);
+            keypt = cv::Point2f(pt_x, pt_y);
             keypoints.push_back(keypt);
         }
     }
@@ -76,28 +75,28 @@ static void draw_pose(const cv::Mat& bgr, const std::vector<cv::Point2f>& keypoi
     cv::Scalar color3(5, 255, 55);
     cv::Scalar color4(25, 15, 255);
     cv::Scalar color5(225, 15, 55);
-    for(size_t j = 0; j < keypoints.size(); j++)
+    for (size_t j = 0; j < keypoints.size(); j++)
     {
-        cv::circle(image, keypoints[j],4,cv::Scalar(255,0,0),-1);
+        cv::circle(image, keypoints[j], 4, cv::Scalar(255, 0, 0), -1);
         if (j < 4)
         {
-            cv::line(image, keypoints[j], keypoints[j+1], color1, 2, 8);
+            cv::line(image, keypoints[j], keypoints[j + 1], color1, 2, 8);
         }
         if (j < 8 && j > 4)
         {
-            cv::line(image, keypoints[j], keypoints[j+1], color2, 2, 8);
+            cv::line(image, keypoints[j], keypoints[j + 1], color2, 2, 8);
         }
         if (j < 12 && j > 8)
         {
-            cv::line(image, keypoints[j], keypoints[j+1], color3, 2, 8);
+            cv::line(image, keypoints[j], keypoints[j + 1], color3, 2, 8);
         }
         if (j < 16 && j > 12)
         {
-            cv::line(image, keypoints[j], keypoints[j+1], color4, 2, 8);
+            cv::line(image, keypoints[j], keypoints[j + 1], color4, 2, 8);
         }
         if (j < 20 && j > 16)
         {
-            cv::line(image, keypoints[j], keypoints[j+1], color5, 2, 8);
+            cv::line(image, keypoints[j], keypoints[j + 1], color5, 2, 8);
         }
     }
     cv::line(image, keypoints[0], keypoints[5], color2, 2, 8);
@@ -117,7 +116,7 @@ int main(int argc, char** argv)
     //    return -1;
     //}
 
-	const char* imagepath = "122.jpg";//argv[1];
+    const char* imagepath = "122.jpg"; //argv[1];
 
     cv::Mat m = cv::imread(imagepath, 1);
     if (m.empty())
