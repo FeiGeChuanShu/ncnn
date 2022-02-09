@@ -55,6 +55,13 @@ Convolution_vulkan::Convolution_vulkan()
 
 int Convolution_vulkan::create_pipeline(const Option& _opt)
 {
+    if (dynamic_weight)
+    {
+        support_vulkan = false;
+        support_image_storage = false;
+        return 0;
+    }
+
     Option opt = _opt;
     const Mat& shape = bottom_shapes.empty() ? Mat() : bottom_shapes[0];
     const Mat& out_shape = top_shapes.empty() ? Mat() : top_shapes[0];
@@ -692,12 +699,10 @@ int Convolution_vulkan::upload_model(VkTransfer& cmd, const Option& opt)
 
         for (int q = 0; q + (out_elempack - 1) < num_output; q += out_elempack)
         {
-            Mat g0 = weight_data_packed.channel(q / out_elempack);
+            float* g00 = weight_data_packed.channel(q / out_elempack);
 
             for (int p = 0; p + (elempack - 1) < num_input; p += elempack)
             {
-                float* g00 = g0.row(p / elempack);
-
                 for (int k = 0; k < maxk; k++)
                 {
                     for (int i = 0; i < out_elempack; i++)
@@ -746,7 +751,7 @@ int Convolution_vulkan::upload_model(VkTransfer& cmd, const Option& opt)
                 {0.0f, 0.0f, 1.0f}
             };
 
-            #pragma omp parallel for
+            #pragma omp parallel for num_threads(opt.num_threads)
             for (int p = 0; p < num_output; p++)
             {
                 for (int q = 0; q < num_input; q++)
@@ -794,7 +799,7 @@ int Convolution_vulkan::upload_model(VkTransfer& cmd, const Option& opt)
                     const Mat k2 = weight_data_tm.channel(q + 2);
                     const Mat k3 = weight_data_tm.channel(q + 3);
 
-                    Mat g0 = weight_data_pack4_tm.channel(q / 4);
+                    float* g00 = weight_data_pack4_tm.channel(q / 4);
 
                     for (int p = 0; p + 3 < num_input; p += 4)
                     {
@@ -817,8 +822,6 @@ int Convolution_vulkan::upload_model(VkTransfer& cmd, const Option& opt)
                         const float* k31 = k3.row(p + 1);
                         const float* k32 = k3.row(p + 2);
                         const float* k33 = k3.row(p + 3);
-
-                        float* g00 = g0.row(p / 4);
 
                         for (int k = 0; k < 16; k++)
                         {
@@ -876,7 +879,7 @@ int Convolution_vulkan::upload_model(VkTransfer& cmd, const Option& opt)
                 {0.0f, 0.0f, 1.0f}
             };
 
-            #pragma omp parallel for
+            #pragma omp parallel for num_threads(opt.num_threads)
             for (int p = 0; p < num_output; p++)
             {
                 for (int q = 0; q < num_input; q++)
@@ -919,12 +922,10 @@ int Convolution_vulkan::upload_model(VkTransfer& cmd, const Option& opt)
 
                 for (int q = 0; q + 7 < num_output; q += 8)
                 {
-                    Mat g0 = weight_data_pack8_tm.channel(q / 8);
+                    float* g00 = weight_data_pack8_tm.channel(q / 8);
 
                     for (int p = 0; p + 7 < num_input; p += 8)
                     {
-                        float* g00 = g0.row(p / 8);
-
                         for (int k = 0; k < 16; k++)
                         {
                             for (int i = 0; i < 8; i++)
@@ -959,7 +960,7 @@ int Convolution_vulkan::upload_model(VkTransfer& cmd, const Option& opt)
     if (bias_term)
     {
         Mat bias_data_packed;
-        convert_packing(bias_data, bias_data_packed, out_elempack);
+        convert_packing(bias_data, bias_data_packed, out_elempack, opt);
 
         if (support_image_storage && opt.use_image_storage)
         {
