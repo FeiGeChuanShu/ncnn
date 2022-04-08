@@ -47,9 +47,9 @@ int Gemm::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
     else
     {
         // transpose A to row-major
-        if(A0.c == B0.c && A0.c > 1)
+        if (A0.c == B0.c && A0.c > 1)
         {
-            A.create(A0.h, A0.w,A0.c, elemsize, opt.workspace_allocator);
+            A.create(A0.h, A0.w, A0.c, elemsize, opt.workspace_allocator);
             for (int c = 0; c < A0.c; c++)
             {
                 for (int i = 0; i < A.h; i++)
@@ -74,16 +74,15 @@ int Gemm::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
                 }
             }
         }
-
     }
 
     Mat B;
     if (transB == 0)
     {
         // transpose B to col-major
-        if(A0.c == B0.c && B0.c > 1)
+        if (A0.c == B0.c && B0.c > 1)
         {
-            B.create(B0.h, B0.w,B0.c, elemsize, opt.workspace_allocator);
+            B.create(B0.h, B0.w, B0.c, elemsize, opt.workspace_allocator);
             for (int c = 0; c < B0.c; c++)
             {
                 for (int i = 0; i < B.h; i++)
@@ -108,7 +107,6 @@ int Gemm::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
                 }
             }
         }
-
     }
     else
     {
@@ -163,13 +161,13 @@ int Gemm::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
     }
 
     Mat& top_blob = top_blobs[0];
-    
+
     if (A0.c == B0.c && A0.c > 1)
     {
         top_blob.create(N, M, A0.c, elemsize, opt.blob_allocator);
         if (top_blob.empty())
             return -100;
-        
+
         for (int c = 0; c < top_blob.c; c++)
         {
             float* outptr = top_blob.channel(c);
@@ -219,8 +217,7 @@ int Gemm::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
         }
         return 0;
     }
-    
-    
+
     top_blob.create(N, M, elemsize, opt.blob_allocator);
     if (top_blob.empty())
         return -100;
