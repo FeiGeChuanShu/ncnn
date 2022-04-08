@@ -73,6 +73,8 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                 for (int i = 0; i < size; i++)
                 {
+                    __builtin_prefetch(ptr + 16);
+                    __builtin_prefetch(ptr1 + 16);
                     v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                     v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                     v4f32 _outp = op(_p, _p1);
@@ -107,6 +109,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                         v4f32 _b0 = (v4f32)__msa_ld_w(ptr1, 0);
                         for (int x = 0; x < w; x++)
                         {
+                            __builtin_prefetch(ptr + 16);
                             v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                             v4f32 _outp = op(_p, _b0);
                             __msa_st_w((v4i32)_outp, outptr, 0);
@@ -139,6 +142,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     {
                         for (int x = 0; x < w; x++)
                         {
+                            __builtin_prefetch(ptr + 16);
                             v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                             v4f32 _outp = op(_p, _b0);
                             __msa_st_w((v4i32)_outp, outptr, 0);
@@ -168,6 +172,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                     for (int i = 0; i < size; i++)
                     {
+                        __builtin_prefetch(ptr + 16);
                         v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                         v4f32 _outp = op(_p, _b0);
                         __msa_st_w((v4i32)_outp, outptr, 0);
@@ -189,6 +194,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                 for (int i = 0; i < size; i++)
                 {
+                    __builtin_prefetch(ptr + 16);
                     v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                     v4f32 _outp = op(_p, _b0);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -223,6 +229,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                         v4f32 _a0 = (v4f32)__msa_ld_w(ptr, 0);
                         for (int x = 0; x < w1; x++)
                         {
+                            __builtin_prefetch(ptr1 + 16);
                             v4f32 _p = (v4f32)__msa_ld_w(ptr1, 0);
                             v4f32 _outp = op(_a0, _p);
                             __msa_st_w((v4i32)_outp, outptr, 0);
@@ -256,7 +263,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     v4f32 _b0 = (v4f32)__msa_ld_w(b0, 0);
                     for (int i = 0; i < size; i++)
                     {
-                        __builtin_prefetch(ptr + 32);
+                        __builtin_prefetch(ptr + 16);
                         v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                         v4f32 _outp = op(_p, _b0);
                         __msa_st_w((v4i32)_outp, outptr, 0);
@@ -283,7 +290,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     float* outptr = c.channel(q);
                     for (int i = 0; i < size; i++)
                     {
-                        __builtin_prefetch(ptr + 32);
+                        __builtin_prefetch(ptr + 16);
                         v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                         v4f32 _p1 = __msa_fill_w_f32(ptr1[0]);
                         v4f32 _outp = op(_p, _p1);
@@ -313,7 +320,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     v4f32 _a0 = (v4f32)__msa_ld_w(a0, 0);
                     for (int i = 0; i < size1; i++)
                     {
-                        __builtin_prefetch(ptr1 + 32);
+                        __builtin_prefetch(ptr1 + 16);
                         v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                         v4f32 _outp = op(_a0, _p1);
                         __msa_st_w((v4i32)_outp, outptr, 0);
@@ -340,8 +347,8 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     float* outptr = c.channel(q);
                     for (int i = 0; i < size1; i++)
                     {
-                        __builtin_prefetch(ptr + 8);
-                        __builtin_prefetch(ptr1 + 32);
+                        __builtin_prefetch(ptr + 16);
+                        __builtin_prefetch(ptr1 + 16);
                         v4f32 _p = __msa_fill_w_f32(ptr[0]);
                         v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                         v4f32 _outp = op(_p, _p1);
@@ -374,7 +381,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                         v4f32 _p1 = (v4f32)__msa_ld_w(ptr1 + y * 4, 0);
                         for (int x = 0; x < w; x++)
                         {
-                            __builtin_prefetch(ptr + 32);
+                            __builtin_prefetch(ptr + 16);
                             v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                             v4f32 _outp = op(_p, _p1);
                             __msa_st_w((v4i32)_outp, outptr, 0);
@@ -406,7 +413,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     {
                         for (int x = 0; x < w; x++)
                         {
-                            __builtin_prefetch(ptr + 32);
+                            __builtin_prefetch(ptr + 16);
                             v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                             v4f32 _p1 = (v4f32)__msa_ld_w(ptr1 + x * 4, 0);
                             v4f32 _outp = op(_p, _p1);
@@ -440,7 +447,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                         v4f32 _p = (v4f32)__msa_ld_w(ptr + y * 4, 0);
                         for (int x = 0; x < w1; x++)
                         {
-                            __builtin_prefetch(ptr1 + 32);
+                            __builtin_prefetch(ptr1 + 16);
                             v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                             v4f32 _outp = op(_p, _p1);
                             __msa_st_w((v4i32)_outp, outptr, 0);
@@ -472,7 +479,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     {
                         for (int x = 0; x < w1; x++)
                         {
-                            __builtin_prefetch(ptr1 + 32);
+                            __builtin_prefetch(ptr1 + 16);
                             v4f32 _p = (v4f32)__msa_ld_w(ptr + x * 4, 0);
                             v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                             v4f32 _outp = op(_p, _p1);
@@ -501,8 +508,8 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                 for (int i = 0; i < size; i++)
                 {
-                    __builtin_prefetch(ptr + 32);
-                    __builtin_prefetch(ptr1 + 32);
+                    __builtin_prefetch(ptr + 16);
+                    __builtin_prefetch(ptr1 + 16);
                     v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                     v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                     v4f32 _outp = op(_p, _p1);
@@ -535,7 +542,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     v4f32 _b0 = (v4f32)__msa_ld_w(ptr1, 0);
                     for (int x = 0; x < w; x++)
                     {
-                        __builtin_prefetch(ptr + 32);
+                        __builtin_prefetch(ptr + 16);
                         v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                         v4f32 _outp = op(_p, _b0);
                         __msa_st_w((v4i32)_outp, outptr, 0);
@@ -564,7 +571,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                     for (int i = 0; i < size; i++)
                     {
-                        __builtin_prefetch(ptr + 32);
+                        __builtin_prefetch(ptr + 16);
                         v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                         v4f32 _outp = op(_p, _b0);
                         __msa_st_w((v4i32)_outp, outptr, 0);
@@ -586,7 +593,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                 for (int i = 0; i < size; i++)
                 {
-                    __builtin_prefetch(ptr + 32);
+                    __builtin_prefetch(ptr + 16);
                     v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                     v4f32 _outp = op(_p, _b0);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -621,6 +628,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     {
                         for (int x = 0; x < w1; x++)
                         {
+                            __builtin_prefetch(ptr1 + 16);
                             v4f32 _p = (v4f32)__msa_ld_w(ptr1, 0);
                             v4f32 _outp = op(_a0, _p);
                             __msa_st_w((v4i32)_outp, outptr, 0);
@@ -655,7 +663,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                     v4f32 _a0 = (v4f32)__msa_ld_w(ptr, 0);
                     for (int x = 0; x < w1; x++)
                     {
-                        __builtin_prefetch(ptr1 + 32);
+                        __builtin_prefetch(ptr1 + 16);
                         v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                         v4f32 _outp = op(_a0, _p1);
                         __msa_st_w((v4i32)_outp, outptr, 0);
@@ -682,8 +690,8 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
             float* outptr = c;
             for (int i = 0; i < size; i++)
             {
-                __builtin_prefetch(ptr + 32);
-                __builtin_prefetch(ptr1 + 32);
+                __builtin_prefetch(ptr + 16);
+                __builtin_prefetch(ptr1 + 16);
                 v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                 v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                 v4f32 _outp = op(_p, _p1);
@@ -710,7 +718,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                 float* outptr = c;
                 for (int i = 0; i < size; i++)
                 {
-                    __builtin_prefetch(ptr + 32);
+                    __builtin_prefetch(ptr + 16);
                     v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                     v4f32 _outp = op(_p, _b0);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -731,7 +739,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                 v4f32 _b0 = (v4f32)__msa_ld_w(ptr1, 0);
                 for (int x = 0; x < w; x++)
                 {
-                    __builtin_prefetch(ptr + 32);
+                    __builtin_prefetch(ptr + 16);
                     v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                     v4f32 _outp = op(_p, _b0);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -765,6 +773,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                     for (int i = 0; i < size1; i++)
                     {
+                        __builtin_prefetch(ptr1 + 16);
                         v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                         v4f32 _outp = op(_a0, _p1);
                         __msa_st_w((v4i32)_outp, outptr, 0);
@@ -792,7 +801,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                     for (int i = 0; i < size1; i++)
                     {
-                        __builtin_prefetch(ptr1 + 32);
+                        __builtin_prefetch(ptr1 + 16);
                         v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                         v4f32 _outp = op(_a0, _p1);
                         __msa_st_w((v4i32)_outp, outptr, 0);
@@ -816,7 +825,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                 float* outptr = c;
                 for (int i = 0; i < size1; i++)
                 {
-                    __builtin_prefetch(ptr1 + 32);
+                    __builtin_prefetch(ptr1 + 16);
                     v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                     v4f32 _outp = op(_a0, _p1);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -839,7 +848,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                 float* outptr = c;
                 for (int i = 0; i < w1; i++)
                 {
-                    __builtin_prefetch(ptr1 + 32);
+                    __builtin_prefetch(ptr1 + 16);
                     v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                     v4f32 _outp = op(_a0, _p1);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -867,6 +876,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                 for (int i = 0; i < size1; i++)
                 {
+                    __builtin_prefetch(ptr1 + 16);
                     v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                     v4f32 _outp = op(_a0, _p1);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -894,7 +904,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
 
                 for (int i = 0; i < size1; i++)
                 {
-                    __builtin_prefetch(ptr1 + 32);
+                    __builtin_prefetch(ptr1 + 16);
                     v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                     v4f32 _outp = op(_a0, _p1);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -922,7 +932,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                 v4f32 _a0 = (v4f32)__msa_ld_w(ptr, 0);
                 for (int x = 0; x < w1; x++)
                 {
-                    __builtin_prefetch(ptr1 + 32);
+                    __builtin_prefetch(ptr1 + 16);
                     v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                     v4f32 _outp = op(_a0, _p1);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -950,7 +960,7 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
                 float* outptr = c;
                 for (int i = 0; i < w; i++)
                 {
-                    __builtin_prefetch(ptr + 32);
+                    __builtin_prefetch(ptr + 16);
                     v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                     v4f32 _outp = op(_p, _b0);
                     __msa_st_w((v4i32)_outp, outptr, 0);
@@ -967,8 +977,8 @@ static int binary_op_pack4(const Mat& a, const Mat& b, Mat& c, const Option& opt
             float* outptr = c;
             for (int i = 0; i < w; i++)
             {
-                __builtin_prefetch(ptr + 32);
-                __builtin_prefetch(ptr1 + 32);
+                __builtin_prefetch(ptr + 16);
+                __builtin_prefetch(ptr1 + 16);
                 v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
                 v4f32 _p1 = (v4f32)__msa_ld_w(ptr1, 0);
                 v4f32 _outp = op(_p, _p1);
@@ -1003,7 +1013,7 @@ static int binary_op_scalar_inplace_pack4(Mat& a, float b, const Option& opt)
 
         for (int i = 0; i < size; i++)
         {
-            __builtin_prefetch(ptr + 32);
+            __builtin_prefetch(ptr + 16);
             v4f32 _p = (v4f32)__msa_ld_w(ptr, 0);
             _p = op(_p, _b);
             __msa_st_w((v4i32)_p, ptr, 0);
@@ -1014,77 +1024,30 @@ static int binary_op_scalar_inplace_pack4(Mat& a, float b, const Option& opt)
     return 0;
 }
 
-struct binary_op_add_pack4
-{
-    v4f32 operator()(const v4f32& x, const v4f32& y) const
-    {
-        return __msa_fadd_w(x, y);
-    }
-};
+namespace BinaryOp_mips_functor {
 
-struct binary_op_sub_pack4
-{
-    v4f32 operator()(const v4f32& x, const v4f32& y) const
-    {
-        return __msa_fsub_w(x, y);
-    }
-};
+#define MAKE_FUNCTION(NAME, IMPL)                              \
+    struct NAME                                                \
+    {                                                          \
+        v4f32 operator()(const v4f32& x, const v4f32& y) const \
+        {                                                      \
+            return IMPL;                                       \
+        }                                                      \
+    };
 
-struct binary_op_mul_pack4
-{
-    v4f32 operator()(const v4f32& x, const v4f32& y) const
-    {
-        return __msa_fmul_w(x, y);
-    }
-};
+MAKE_FUNCTION(binary_op_add_pack4, __msa_fadd_w(x, y))
+MAKE_FUNCTION(binary_op_sub_pack4, __msa_fsub_w(x, y))
+MAKE_FUNCTION(binary_op_mul_pack4, __msa_fmul_w(x, y))
+MAKE_FUNCTION(binary_op_div_pack4, __msa_fdiv_w(x, y))
+MAKE_FUNCTION(binary_op_max_pack4, __msa_fmax_w(x, y))
+MAKE_FUNCTION(binary_op_min_pack4, __msa_fmin_w(x, y))
+MAKE_FUNCTION(binary_op_pow_pack4, pow_ps(x, y))
+MAKE_FUNCTION(binary_op_rsub_pack4, __msa_fsub_w(y, x))
+MAKE_FUNCTION(binary_op_rdiv_pack4, __msa_fdiv_w(y, x))
 
-struct binary_op_div_pack4
-{
-    v4f32 operator()(const v4f32& x, const v4f32& y) const
-    {
-        return __msa_fdiv_w(x, y);
-    }
-};
+#undef MAKE_FUNCTION
 
-struct binary_op_max_pack4
-{
-    v4f32 operator()(const v4f32& x, const v4f32& y) const
-    {
-        return __msa_fmax_w(x, y);
-    }
-};
-
-struct binary_op_min_pack4
-{
-    v4f32 operator()(const v4f32& x, const v4f32& y) const
-    {
-        return __msa_fmin_w(x, y);
-    }
-};
-
-struct binary_op_pow_pack4
-{
-    v4f32 operator()(const v4f32& x, const v4f32& y) const
-    {
-        return pow_ps(x, y);
-    }
-};
-
-struct binary_op_rsub_pack4
-{
-    v4f32 operator()(const v4f32& x, const v4f32& y) const
-    {
-        return __msa_fsub_w(y, x);
-    }
-};
-
-struct binary_op_rdiv_pack4
-{
-    v4f32 operator()(const v4f32& x, const v4f32& y) const
-    {
-        return __msa_fdiv_w(y, x);
-    }
-};
+} // namespace BinaryOp_mips_functor
 #endif // __mips_msa
 
 int BinaryOp_mips::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_blobs, const Option& opt) const
@@ -1094,6 +1057,8 @@ int BinaryOp_mips::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat
     Mat& top_blob = top_blobs[0];
 
 #if __mips_msa
+    using namespace BinaryOp_mips_functor;
+
     int elempack = bottom_blob.elempack;
     int elempack1 = bottom_blob1.elempack;
 
@@ -1134,6 +1099,8 @@ int BinaryOp_mips::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat
 int BinaryOp_mips::forward_inplace(Mat& bottom_top_blob, const Option& opt) const
 {
 #if __mips_msa
+    using namespace BinaryOp_mips_functor;
+
     int elempack = bottom_top_blob.elempack;
 
     if (elempack == 4)
