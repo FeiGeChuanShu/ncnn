@@ -47,32 +47,68 @@ int Gemm::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
     else
     {
         // transpose A to row-major
-        A.create(A0.h, A0.w, elemsize, opt.workspace_allocator);
-
-        for (int i = 0; i < A.h; i++)
+        if(A0.c == B0.c && A0.c > 1)
         {
-            float* ptr = A.row(i);
-            for (int j = 0; j < A.w; j++)
+            A.create(A0.h, A0.w,A0.c, elemsize, opt.workspace_allocator);
+            for (int c = 0; c < A0.c; c++)
             {
-                ptr[j] = A0.row(j)[i];
+                for (int i = 0; i < A.h; i++)
+                {
+                    float* ptr = A.channel(c).row(i);
+                    for (int j = 0; j < A.w; j++)
+                    {
+                        ptr[j] = A0.channel(c).row(j)[i];
+                    }
+                }
             }
         }
+        else
+        {
+            A.create(A0.h, A0.w, elemsize, opt.workspace_allocator);
+            for (int i = 0; i < A.h; i++)
+            {
+                float* ptr = A.row(i);
+                for (int j = 0; j < A.w; j++)
+                {
+                    ptr[j] = A0.row(j)[i];
+                }
+            }
+        }
+
     }
 
     Mat B;
     if (transB == 0)
     {
         // transpose B to col-major
-        B.create(B0.h, B0.w, elemsize, opt.workspace_allocator);
-
-        for (int i = 0; i < B.h; i++)
+        if(A0.c == B0.c && B0.c > 1)
         {
-            float* ptr = B.row(i);
-            for (int j = 0; j < B.w; j++)
+            B.create(B0.h, B0.w,B0.c, elemsize, opt.workspace_allocator);
+            for (int c = 0; c < B0.c; c++)
             {
-                ptr[j] = B0.row(j)[i];
+                for (int i = 0; i < B.h; i++)
+                {
+                    float* ptr = B.channel(c).row(i);
+                    for (int j = 0; j < B.w; j++)
+                    {
+                        ptr[j] = B0.channel(c).row(j)[i];
+                    }
+                }
             }
         }
+        else
+        {
+            B.create(B0.h, B0.w, elemsize, opt.workspace_allocator);
+            for (int i = 0; i < B.h; i++)
+            {
+                float* ptr = B.row(i);
+                for (int j = 0; j < B.w; j++)
+                {
+                    ptr[j] = B0.row(j)[i];
+                }
+            }
+        }
+
     }
     else
     {
@@ -127,6 +163,64 @@ int Gemm::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
     }
 
     Mat& top_blob = top_blobs[0];
+    
+    if (A0.c == B0.c && A0.c > 1)
+    {
+        top_blob.create(N, M, A0.c, elemsize, opt.blob_allocator);
+        if (top_blob.empty())
+            return -100;
+        
+        for (int c = 0; c < top_blob.c; c++)
+        {
+            float* outptr = top_blob.channel(c);
+            for (int i = 0; i < M; i++)
+            {
+                const float* ptrA = A.channel(c).row(i);
+
+                for (int j = 0; j < N; j++)
+                {
+                    const float* ptrB = B.channel(c).row(j);
+
+                    float sum = 0.f;
+                    if (has_C)
+                    {
+                        if (broadcast_type_C == 0)
+                        {
+                            sum = ptrC[0];
+                        }
+                        if (broadcast_type_C == 1)
+                        {
+                            sum = ptrC[i];
+                        }
+                        if (broadcast_type_C == 2)
+                        {
+                            sum = ptrC[i];
+                        }
+                        if (broadcast_type_C == 3)
+                        {
+                            sum = ptrC[i * N + j];
+                        }
+                        if (broadcast_type_C == 4)
+                        {
+                            sum = ptrC[j];
+                        }
+
+                        sum *= beta;
+                    }
+
+                    for (int k = 0; k < K; k++)
+                    {
+                        sum += ptrA[k] * ptrB[k];
+                    }
+
+                    *outptr++ = sum * alpha;
+                }
+            }
+        }
+        return 0;
+    }
+    
+    
     top_blob.create(N, M, elemsize, opt.blob_allocator);
     if (top_blob.empty())
         return -100;
